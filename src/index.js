@@ -4,3 +4,4 @@ import './styles/style.sass';
 import { game } from './scripts/game'
 
 game()
+

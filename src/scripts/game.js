@@ -2,101 +2,122 @@ export const game = () => {
   const canvas = document.querySelector('canvas')
   const ctx = canvas.getContext('2d')
 
-  let ballX = canvas.width / 2
-  let ballY = canvas.height - 30
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
 
-  let ballSpeedX = 4
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  })
+
+  const paddleHeight = 10
+  const paddleWidth = 100
+
+  const ballRadius = 10
+  let ballSpeedX = 5
   let ballSpeedY = -20
 
-  let paddleX = 450
-  let paddleWidth = 100
+  let paddlePosition = canvas.width / 2 - paddleWidth / 2
+
+  let ballX = canvas.width / 2 
+  let ballY = canvas.height - ( paddleHeight + ballRadius )
+
 
   let color = 'darkgray' //zmienialny 
 
-  const framesPerSecond = 30
+  const setStartData = () => {
+    ballSpeedX = 2
+    ballSpeedY = -10
+    paddlePosition = 450
+    ballY = canvas.height - ( paddleHeight + ballRadius )
+  }
 
-  const colorCircle = (centerX, centerY, radius, drawColor) => {
+  const createCircle = (centerX, centerY, radius, drawColor) => {
     ctx.fillStyle = drawColor
     ctx.beginPath()
     ctx.arc(centerX, centerY, radius, 0, Math.PI*2, true)
     ctx.fill()
   }
 
-  const colorRect = (leftX, topY, width, height, drawColor) => {
+  const createRect = (leftX, topY, width, height, drawColor) => {
     ctx.fillStyle = drawColor
     ctx.fillRect(leftX, topY, width, height)
+  }
+
+  const drawBricks = () => {
+    for(let i=0; i<5; i++){
+      let x = 35+i*200
+      createRect(x, 20, 130, 40, 'red') 
+    }
   }
 
   const calculateMousePos = event => {
     const rect = canvas.getBoundingClientRect()
     const root = document.documentElement
-    const mouseX = event.clientX - rect.left - root.scrollLeft
-    const mouseY = event.clientY - rect.top - root.scrollTop
-    return {
-      x: mouseX,
-      y: mouseY
-    }
+    return  event.clientX - rect.left - root.scrollLeft
   }
 
-  const drawEverything = () => {  
-    colorRect(0, 0, canvas.width, canvas.height, 'black')
-    colorRect(paddleX, canvas.height-20, 100, 20, 'white')
-    colorCircle(ballX, ballY, 10, 'red')  
-    drawBoxes()
-  }
-
-  const drawBoxes = () => {
-    colorRect(200, 200, 120, 40, color)
+  const drawEverything = (paddlePosition, ballX, ballY) => {  
+    createRect(0, 0, canvas.width, canvas.height, 'black')
+    createRect(paddlePosition, canvas.height-paddleHeight, paddleWidth, paddleHeight, 'white')
+    createCircle(ballX, ballY, ballRadius, 'red')  
+    //drawBricks()
   }
 
   const findColition = () => {
     if(ballY > 200 && ballY < 240 && ballX > 200 && ballX < 320) {
       color = 'black'
-      colorRect(200, 200, 120, 40, color)
+      createRect(200, 200, 120, 40, color)
     }
   }
 
-  const moveEverything = () => {
+  const moveBall = () => {
+    ballX += ballSpeedX
+    ballY += ballSpeedY
 
-    ballX = ballX + ballSpeedX
-    ballY = ballY + ballSpeedY
-
-    if (ballX > canvas.width ) {
-      ballSpeedX = (-1) * ballSpeedX
+    if (ballX > canvas.width - ballRadius ) ballSpeedX = (-1) * ballSpeedX 
+    else if(ballX < ballRadius) ballSpeedX = (-1) * ballSpeedX
+    
+    if(ballY > (canvas.height - (paddleHeight + 2*ballRadius)) && ballX > paddlePosition && ballX < (paddlePosition + paddleWidth)) {      
+      ballSpeedY = (-1) * ballSpeedY  
+      const ballAngle = ballX - (paddlePosition + paddleWidth / 2)
+      ballSpeedX = ballAngle * 0.35
     }
-    else if(ballX < 0) {
-      ballSpeedX = (-1) * ballSpeedX
+    else if(ballY < 2 * ballRadius){
+      ballSpeedY = (-1) * ballSpeedY
     }
-
-    if(ballY > canvas.height) {
-      if(ballX > paddleX && ballX < paddleX + paddleWidth){
-        ballSpeedY = (-1) * ballSpeedY  
-
-        const deltaY = ballX - (paddleX + paddleWidth / 2)
-        ballSpeedX = deltaY * 0.35
-      }
-      else {
-        ballX =  500
-        ballY = 800
-      }
-    }
-    else if(ballY < 0) ballSpeedY = (-1) * ballSpeedY
   }
 
-  drawEverything()
-
-  canvas.addEventListener('click', () => {
-    window.setInterval(() => {
-      moveEverything()
-      drawEverything()
-      findColition()
-    }, 1000/framesPerSecond)
-  })
-
-  canvas.addEventListener('mousemove', event => {
+  const mouseMoveController = () => {
     const mouseMove = calculateMousePos(event)
-    paddleX = mouseMove.x - paddleWidth / 2
-  })
+    if(mouseMove >= paddleWidth / 2 && mouseMove <= canvas.width - paddleWidth / 2 ) paddlePosition = mouseMove - paddleWidth / 2
+  }
+ 
+  let startInterval = null
+  const startGame = () => {
+    startInterval = setInterval(() => {
+      moveBall()
+      drawEverything(paddlePosition, ballX, ballY)
+      killBall()
+    }, 33)
+  }
+
+  const killBall = () => {
+    if(ballY > canvas.height){
+      clearInterval(startInterval)
+      ballX = canvas.width / 2 
+      ballY = canvas.height - ( paddleHeight + ballRadius )
+      paddlePosition = canvas.width / 2 - paddleWidth / 2
+      drawEverything(paddlePosition, ballX, ballY)
+      ballSpeedY = (-1) * ballSpeedY
+    }
+  }
+
+  drawEverything(paddlePosition, ballX, ballY)
+
+  window.addEventListener('keydown', startGame)
+
+  window.addEventListener('mousemove', event => mouseMoveController(event))
 }
 
 
