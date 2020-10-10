@@ -1,8 +1,13 @@
 import StartPosition from './startPosition'
 import { createCircle, createRect } from './createElements'
+import { createModal, removeModal } from './modal'
+//import createModal from './modal'
+//import removeModal from './modal'
+
 
 
 const game = () => {
+  createModal()
   const canvas = document.querySelector('canvas')
   const ctx = canvas.getContext('2d')
   const playButton = document.querySelector('.modal-button')
@@ -13,7 +18,6 @@ const game = () => {
     canvas.height = window.innerHeight
   }
   setResponsiveCanvas()
-
 
   window.addEventListener('resize', setResponsiveCanvas)
   const start = new StartPosition(canvas.width, canvas.height)
@@ -27,6 +31,11 @@ const game = () => {
     const rect = canvas.getBoundingClientRect()
     const root = document.documentElement
     return  event.clientX - rect.left - root.scrollLeft
+  }
+
+  const mouseMoveController = () => {
+    const mouseMove = calculateMousePos(event)
+    if(mouseMove >= width / 2 && mouseMove <= canvas.width - width / 2 ) paddlePosition = mouseMove - width / 2
   }
 
   const drawEverything = (paddlePosition, x, y) => {  
@@ -51,17 +60,9 @@ const game = () => {
       speedY = (-1) * speedY
     }
   }
-
-  const mouseMoveController = () => {
-    const mouseMove = calculateMousePos(event)
-    if(mouseMove >= width / 2 && mouseMove <= canvas.width - width / 2 ) paddlePosition = mouseMove - width / 2
-  }
  
   let startInterval = null
-  const startGame = () => {
-
-    modal.style.display = 'none'
-
+  const startGame = () => { 
     startInterval = setInterval(() => {
       moveBall()
       drawEverything(paddlePosition, x, y)
@@ -75,17 +76,26 @@ const game = () => {
       x = canvas.width / 2 
       y = canvas.height - ( height + radius )
       paddlePosition = canvas.width / 2 - width / 2
-      drawEverything(paddlePosition, x, y)
       speedY = (-1) * speedY
+      drawEverything(paddlePosition, x, y)
+      createModal()
     }
   }
 
-  drawEverything(paddlePosition, x, y)
+  //drawEverything(paddlePosition, x, y)
 
-  playButton.addEventListener('click', startGame)
-
+  //playButton.addEventListener('click', startGame)
   window.addEventListener('mousemove', event => mouseMoveController(event))
+
+  window.addEventListener('click', event => {
+    if(event.target.className === 'modal-button'){
+      removeModal()
+      startGame()
+    }
+  })
 }
+
+
 
 export default game
 
