@@ -1,18 +1,15 @@
 import StartPosition from './startPosition'
 import { createCircle, createRect } from './createElements'
 import { createModal, removeModal } from './modal'
-//import createModal from './modal'
-//import removeModal from './modal'
-
-
+import isMobile from './isMobile'
+import createLevels from './createLevels'
 
 const game = () => {
+  
   createModal()
   const canvas = document.querySelector('canvas')
   const ctx = canvas.getContext('2d')
-  const playButton = document.querySelector('.modal-button')
-  const modal = document.querySelector('.modal-background')
-  
+
   const setResponsiveCanvas = () => {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
@@ -21,11 +18,10 @@ const game = () => {
 
   window.addEventListener('resize', setResponsiveCanvas)
   const start = new StartPosition(canvas.width, canvas.height)
-  
+
   const { height, width } = start.paddle
   let paddlePosition = canvas.width / 2 - width / 2    
   let { radius, speedX, speedY, x, y } = start.ball
-  
   
   const calculateMousePos = event => {
     const rect = canvas.getBoundingClientRect()
@@ -33,7 +29,7 @@ const game = () => {
     return  event.clientX - rect.left - root.scrollLeft
   }
 
-  const mouseMoveController = () => {
+  const mouseMoveController = event => {
     const mouseMove = calculateMousePos(event)
     if(mouseMove >= width / 2 && mouseMove <= canvas.width - width / 2 ) paddlePosition = mouseMove - width / 2
   }
@@ -41,7 +37,8 @@ const game = () => {
   const drawEverything = (paddlePosition, x, y) => {  
     createRect(ctx, 0, 0, canvas.width, canvas.height, 'black')
     createRect(ctx, paddlePosition, canvas.height-height, width, height, 'white')
-    createCircle(ctx, x, y, radius, 'red')  
+    createCircle(ctx, x, y, radius, 'red') 
+    createLevels(ctx, radius, x, y)
   }
 
   const moveBall = () => {
@@ -82,11 +79,15 @@ const game = () => {
     }
   }
 
-  //drawEverything(paddlePosition, x, y)
-
-  //playButton.addEventListener('click', startGame)
-  window.addEventListener('mousemove', event => mouseMoveController(event))
-
+  const controlPaddle = event => {
+    isMobile() ? (
+      window.addEventListener('touchmove', event => mouseMoveController(event.targetTouches[0]))
+    ) : (
+      window.addEventListener('mousemove', event => mouseMoveController(event))
+    )
+  }
+  controlPaddle()
+  
   window.addEventListener('click', event => {
     if(event.target.className === 'modal-button'){
       removeModal()
@@ -94,8 +95,6 @@ const game = () => {
     }
   })
 }
-
-
 
 export default game
 
