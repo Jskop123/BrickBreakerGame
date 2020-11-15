@@ -9,7 +9,7 @@ class StartPosition {
     }
     this.ball = {
       radius: 10,
-      speedX: 5,
+      speedX: 5, 
       speedY: -20,
       x: this.canvasWidth / 2,
       y: this.canvasHeight - this.paddle.height - 10

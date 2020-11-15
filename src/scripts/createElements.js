@@ -10,4 +10,5 @@ const createRect = (ctx, leftX, topY, width, height, drawColor) => {
   ctx.fillRect(leftX, topY, width, height)
 }
 
+
 export { createCircle, createRect }

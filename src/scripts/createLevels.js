@@ -1,16 +1,15 @@
 import { createRect } from './createElements'
-import collisions from './collisions'
-const json = require('../01.json')
 
-const createLevels = (ctx, radius, x, y) => {  
-  const bricks = json.brick_positions
-  bricks.forEach(brick => {
-    createRect(ctx, brick.x, brick.y, brick.w, brick.h, brick.c)
-  })
-  collisions(bricks, ctx, radius, x, y)
+const levelNr = level => {
+  const path = `../data/levels/0${level}.json`
+  return path
 }
 
-export default createLevels
+const createLevels = (bricks, ctx) => (  
+  bricks.forEach(brick => createRect(ctx, brick.x, brick.y, brick.w, brick.h, brick.c))
+)
 
 
-//ctx, leftX, topY, width, height, drawColor
+
+export { createLevels, levelNr }
+

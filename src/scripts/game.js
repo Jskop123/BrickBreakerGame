@@ -2,10 +2,15 @@ import StartPosition from './startPosition'
 import { createCircle, createRect } from './createElements'
 import { createModal, removeModal } from './modal'
 import isMobile from './isMobile'
-import createLevels from './createLevels'
+import { createLevels, levelNr } from './createLevels'
+import collisions from './collisions'
+import winLevel from './winLevel'
 
 const game = () => {
-  
+
+  let level = 1
+  let json = require('../data/levels/01.json')
+  const bricks = json.brick_positions
   createModal()
   const canvas = document.querySelector('canvas')
   const ctx = canvas.getContext('2d')
@@ -15,13 +20,20 @@ const game = () => {
     canvas.height = window.innerHeight
   }
   setResponsiveCanvas()
-
   window.addEventListener('resize', setResponsiveCanvas)
-  const start = new StartPosition(canvas.width, canvas.height)
+  
+  const drawEverything = (paddlePosition, x, y) => {  
+    createRect(ctx, 0, 0, canvas.width, canvas.height, 'black')
+    createRect(ctx, paddlePosition, canvas.height-height, width, height, 'white')
+    createCircle(ctx, x, y, radius, 'red') 
+    createLevels(bricks, ctx)
+  }
 
+  const start = new StartPosition(canvas.width, canvas.height)
   const { height, width } = start.paddle
   let paddlePosition = canvas.width / 2 - width / 2    
   let { radius, speedX, speedY, x, y } = start.ball
+  
   
   const calculateMousePos = event => {
     const rect = canvas.getBoundingClientRect()
@@ -32,13 +44,6 @@ const game = () => {
   const mouseMoveController = event => {
     const mouseMove = calculateMousePos(event)
     if(mouseMove >= width / 2 && mouseMove <= canvas.width - width / 2 ) paddlePosition = mouseMove - width / 2
-  }
-
-  const drawEverything = (paddlePosition, x, y) => {  
-    createRect(ctx, 0, 0, canvas.width, canvas.height, 'black')
-    createRect(ctx, paddlePosition, canvas.height-height, width, height, 'white')
-    createCircle(ctx, x, y, radius, 'red') 
-    createLevels(ctx, radius, x, y)
   }
 
   const moveBall = () => {
@@ -55,6 +60,11 @@ const game = () => {
     }
     else if(y < 2 * radius){
       speedY = (-1) * speedY
+    }
+    let collision = collisions(bricks, ctx, radius, x, y)
+    if(collision){
+      speedY = (-1) * speedY
+      winLevel(bricks, level)  
     }
   }
  
