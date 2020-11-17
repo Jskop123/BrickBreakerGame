@@ -5,11 +5,11 @@ const levelNr = level => {
   return path
 }
 
-const createLevels = (bricks, ctx) => (  
-  bricks.forEach(brick => createRect(ctx, brick.x, brick.y, brick.w, brick.h, brick.c))
-)
-
-
+const createLevels = (bricks, ctx) => {
+  const brickWidth = Math.floor(ctx.canvas.width / 10)
+  const brickHeight = Math.floor(ctx.canvas.height / 50)
+  return bricks.forEach(brick => createRect(ctx, brick.x, brick.y, brickWidth, brickHeight, brick.c))
+}
 
 export { createLevels, levelNr }
 
