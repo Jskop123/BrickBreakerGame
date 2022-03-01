@@ -1,4 +1,5 @@
 import { createModal } from "./modal"
+import { game } from "./game"
 
 const winLevel = (array, level) => {
   console.log('win')
@@ -7,9 +8,10 @@ const winLevel = (array, level) => {
       alert('win')
       createModal()
     }, 100)
-    level++
-    console.log(level)
-    return level
+    game('01.js')
+    //level++
+    //console.log(level)
+    //return level
   }
 }
 
